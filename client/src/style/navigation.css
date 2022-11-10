@@ -6,3 +6,13 @@
   height: 45px;
   font-size: 1.3rem;
 }
+.bg {
+  background-color: rgb(241, 214, 179) !important;
+}
+.dis {
+  width: 260px;
+}
+.hei {
+  padding-top: 20px;
+  padding-bottom: 50px;
+}

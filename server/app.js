@@ -7,7 +7,7 @@ const bluebird = require("bluebird");
 const client = redis.createClient();
 
 // It’ll add a Async to all node_redis functions (e.g. return client.getAsync().then())
-const cors = require("cors");
+// const cors = require("cors");
 // let express to connectgraphQL
 // const graphqlHTTP = require("express-graphql").graphqlHTTP;
 // const schema = require("./schema/schema");
@@ -21,7 +21,7 @@ client.on("error", function (err) {
 
 const app = express();
 
-app.use(cors());
+// app.use(cors());
 
 // let express handle the graphQL data, by passing graphQL schema
 // app.use(
@@ -126,21 +126,24 @@ const resolvers = {
         const { data } = await axios.get(
           `https://api.unsplash.com/photos/?client_id=zTflS14263ZfZA5SifiGuz5ez1bax5aIlHzlpq8yK7g&page=${args.pageNum}`
         );
-        console.log(data);
+        // console.log(data);
         const imageList = [];
         for (let i = 0; i < data.length; i += 1) {
           const cache = await client.getAsync(data[i].id);
-          console.log(`cache: ${cache}`);
+          console.log(`unsplashImage cache: ${cache}`);
           let binned = false;
           if (cache) {
             binned = true;
           }
+          // console.log(`data[i].likes:${data[i].likes}`);
           let image = {
             id: data[i].id,
+            description: data[i].description,
             url: data[i].urls.regular,
-            posterName: data[i].posterName,
+            posterName: data[i].user.name ? data[i].user.name : "N/A",
             userPosted: false,
             binned: binned,
+            numBinned: data[i].likes,
           };
           imageList.push(image);
         }
@@ -204,8 +207,9 @@ const resolvers = {
         const userPost = {
           id: uuid.v4(),
           url: args.url,
-          description: args.description,
-          posterName: args.posterName,
+          description:
+            args.description === undefined ? "N/A" : args.description,
+          posterName: args.posterName === undefined ? "N/A" : args.posterName,
           binned: false,
           userPosted: true,
           numBinned: 0,
@@ -221,22 +225,38 @@ const resolvers = {
 
     updateImage: async (_, args) => {
       try {
+        // console.log(args);
         if (!args.id) {
           throw Error("Please input a id");
         }
+
         const cache = JSON.parse(await client.getAsync(args.id));
-        console.log(
-          `update cache:${cache},cache.userPosted:${cache.userPosted}`
-        );
+        console.log(`update cache:${cache}`);
 
         const userPost = {
           id: args.id,
-          url: cache ? cache.url : args.url,
-          description: cache ? cache.description : args.description,
-          posterName: cache ? cache.posterName : args.posterName,
-          binned: cache ? cache.binned : args.binned,
-          userPosted: cache ? cache.userPosted : args.userPosted,
-          numBinned: cache ? cache.numBinned : args.numBinned,
+          url: cache ? cache.url : args.url === undefined ? "N/A" : args.url,
+          description: cache
+            ? cache.description
+            : args.description === undefined
+            ? "N/A"
+            : args.description,
+          posterName: cache
+            ? cache.posterName
+            : args.posterName === undefined
+            ? "N/A"
+            : args.posterName,
+          binned: args.binned,
+          userPosted: cache
+            ? cache.userPosted
+            : args.userPosted === undefined
+            ? "N/A"
+            : args.userPosted,
+          numBinned: cache
+            ? cache.numBinned
+            : args.numBinned === undefined
+            ? 0
+            : args.numBinned,
         };
         const convertToString = JSON.stringify(userPost);
         // const cache = JSON.parse(await client.getAsync(args.id));

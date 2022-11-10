@@ -24,16 +24,16 @@ const client = new ApolloClient({
 function App() {
   return (
     <div className="App">
-      <img src={logo} className="App-logo" alt="logo" />
+      {/* <img src={logo} className="App-logo" alt="logo" /> */}
 
       <ApolloProvider client={client}>
         {/* <ImageList /> */}
         <h1>Binterest</h1>
 
         <BrowserRouter>
+          <Navigation />
           <Routes>
-            <Route path="/" element={<Navigation />}></Route>
-            <Route exact path="/" element={<Home type={"imagesList"} />}>
+            <Route exact path="/" element={<Home type={"images"} />}>
               All Images List
             </Route>
 

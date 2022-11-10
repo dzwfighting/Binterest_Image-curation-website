@@ -1,0 +1,9 @@
+.bottom {
+  padding-bottom: 50px;
+}
+.btn {
+  /* font-variant: normal; */
+  font-family: American Typewriter, serif !important;
+  font-size: 30px !important;
+  color: rgb(124, 55, 55) !important;
+}
