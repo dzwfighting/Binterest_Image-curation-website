@@ -59,6 +59,7 @@ const Home = (props) => {
 
   let totalCount = 0;
   let card = null;
+  const navigate = useNavigate();
 
   const next = async () => {
     setPageNum(pageNum + 1);
@@ -97,9 +98,9 @@ const Home = (props) => {
 
   // get popularity data
   const {
-    loading: PopularityLoading,
-    error: PopularityError,
-    data: PopularityData,
+    loading: popularityLoading,
+    error: popularityError,
+    data: popularityData,
   } = useQuery(queries.POPULARITY, {
     fetchPolicy: "cache-and-network",
   });
@@ -124,16 +125,19 @@ const Home = (props) => {
   // achieve delete a image
   const [removeImage] = useMutation(queries.DELETE_IMAGE, {
     update(cache) {
+      console.log(`del userPost ${cache}`);
       const { images } = cache.readQuery({
         query: queries.USERPOSTED,
       });
       console.log(`remove part, read images: ${images}`);
-      cache.writeQuery({
-        query: queries.USERPOSTED,
-        data: {
-          images: images.filter((e) => e.id === userData.images.id),
-        },
-      });
+      if (images) {
+        cache.writeQuery({
+          query: queries.USERPOSTED,
+          data: {
+            images: images.filter((e) => e.id === userData.images.id),
+          },
+        });
+      }
     },
   });
 
@@ -146,7 +150,24 @@ const Home = (props) => {
     updateData(image);
   };
 
+  const delPost = (image) => {
+    console.log(image);
+    try {
+      removeImage({
+        variables: {
+          id: image.id,
+        },
+      });
+    } catch (error) {
+      throw Error(error.message);
+    }
+    navigate("/");
+  };
+
   const buildCard = (image) => {
+    if (!image) {
+      return <div></div>;
+    }
     return (
       <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={image.id}>
         <Card className={classes.card} variant="outlined">
@@ -169,57 +190,72 @@ const Home = (props) => {
               className={classes.media}
               component="img"
               image={image.url ? image.url : noImage}
-              title="image content"
+              title="No Image"
             />
 
             {/* </Link> */}
-            {(type === "images" ||
-              type === "bin" ||
-              type === "my-posts" ||
-              type === "popularity") && (
-              <Typography variant="body2" color="textSecondary" component="p">
-                {image.binned ? (
-                  <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      delBin(image);
-                    }}
-                  >
-                    Delete from bin
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      binButton(image);
-                    }}
-                  >
-                    add to Bin
-                  </Button>
-                )}
-              </Typography>
-            )}
-            {type === "my-posts" && (
-              <Typography variant="body2" color="textSecondary" component="p">
-                <Button />
-              </Typography>
-            )}
           </CardActionArea>
+          {(type === "images" || type === "bin" || type === "popularity") && (
+            <Typography variant="body2" color="textSecondary" component="p">
+              {image.binned ? (
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    delBin(image);
+                  }}
+                >
+                  Delete from bin
+                </Button>
+              ) : (
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    binButton(image);
+                  }}
+                >
+                  add to Bin
+                </Button>
+              )}
+            </Typography>
+          )}
+
+          {type === "allPosts" && image.userPosted && (
+            <Typography variant="body2" color="textSecondary" component="p">
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  delPost(image);
+                }}
+              >
+                Delete Post
+              </Button>
+            </Typography>
+          )}
         </Card>
       </Grid>
     );
   };
 
   const renderCard = (getImage) => {
-    // console.log(`getImage: ${getImage}`);
+    // console.log(`renderCard imageData: ${getImage}`);
+    if (type === "popularity") {
+      // console.log(getCard);
+
+      let getCard = getImage.getTopTenBinnedPosts.map((image) => {
+        if (image.binned === true) {
+          return buildCard(image);
+        }
+      });
+      return getCard;
+    }
     let getCard = getImage.map((image) => {
-      console.log(image);
+      // console.log(image);
       if (type === "bin") {
         if (image.binned === true) {
           return buildCard(image);
         }
       } else if (type === "allPosts") {
-        if (image.userPosted === true) {
+        if (image && image.userPosted === true) {
           return buildCard(image);
         }
       } else {
@@ -238,26 +274,36 @@ const Home = (props) => {
   } else if (type === "allPosts" && !userLoading) {
     console.log(userData);
     card = renderCard(userData.userPostedImages);
+  } else if (type === "popularity" && !popularityLoading) {
+    console.log(popularityData);
+    card = renderCard(popularityData);
   }
-  if (unsplashLoading || binnedLoading || userLoading || PopularityLoading) {
+  if (unsplashLoading || binnedLoading || userLoading || popularityLoading) {
     return <div>Loading...</div>;
   } else if (card) {
     return (
       <div>
         <div>
-          <Grid container className="classes.grid bottom" spacing={5}>
-            {card}
-          </Grid>
-          {(type === "images" || type === "bin" || type === "my-posts") && (
+          {card ? (
+            <Grid container className="classes.grid bottom" spacing={5}>
+              {card}
+            </Grid>
+          ) : (
+            <div>
+              <br />
+            </div>
+          )}
+
+          {(type === "images" ||
+            type === "bin" ||
+            type === "allPosts" ||
+            type === "popularity") && (
             <Button className="btn btn-outline-warning" onClick={next}>
               Get More
             </Button>
           )}
           {/* {card.length === 0 && <h2>No Images</h2>} */}
         </div>
-        <div>{type === "my-bin"}</div>
-        <div>{type === "my-posts"}</div>
-        <div>{type === "popularity"}</div>
       </div>
     );
   } else {

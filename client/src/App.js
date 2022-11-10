@@ -45,7 +45,7 @@ function App() {
               All Upload images
             </Route>
 
-            <Route exact path="/new-post" element={<Home type={"posts"} />}>
+            <Route exact path="/new-post" element={<Home type={"post"} />}>
               Upload posts
             </Route>
 
