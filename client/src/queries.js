@@ -65,16 +65,16 @@ const UPDATE_IMAGE = gql`
     updateImage(
       id: $id
       url: $url
-      posterName: $posterName
       description: $description
+      posterName: $posterName
       userPosted: $userPosted
       binned: $binned
       numBinned: $numBinned
     ) {
       id
       url
-      posterName
       description
+      posterName
       userPosted
       binned
       numBinned

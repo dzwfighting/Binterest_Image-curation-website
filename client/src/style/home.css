@@ -1,9 +1,21 @@
 .bottom {
   padding-bottom: 50px;
 }
+.NoImgDis {
+  padding-top: 50px;
+}
+.NoImg {
+  font-size: 1.7rem;
+}
 .btn {
   /* font-variant: normal; */
   font-family: American Typewriter, serif !important;
   font-size: 30px !important;
   color: rgb(124, 55, 55) !important;
+}
+.backHome {
+  padding-top: 70px;
+}
+.btnWid {
+  width: 600px !important;
 }

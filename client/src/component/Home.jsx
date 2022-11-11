@@ -2,9 +2,9 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
-import axios from "axios";
 import Error from "./Error";
 import queries from "../queries";
+import Alert from "react-bootstrap/Alert";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../style/home.css";
 import noImage from "../img/download.jpeg";
@@ -165,9 +165,6 @@ const Home = (props) => {
   };
 
   const buildCard = (image) => {
-    if (!image) {
-      return <div></div>;
-    }
     return (
       <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={image.id}>
         <Card className={classes.card} variant="outlined">
@@ -262,6 +259,7 @@ const Home = (props) => {
         return buildCard(image);
       }
     });
+    // console.log(getCard);
     return getCard;
   };
   if (type === "images" && !unsplashLoading) {
@@ -271,6 +269,7 @@ const Home = (props) => {
   } else if (type === "bin" && !binnedLoading) {
     console.log(`binnedData: ${binnedData}`);
     card = renderCard(binnedData.binnedImages);
+    console.log(card);
   } else if (type === "allPosts" && !userLoading) {
     console.log(userData);
     card = renderCard(userData.userPostedImages);
@@ -280,29 +279,63 @@ const Home = (props) => {
   }
   if (unsplashLoading || binnedLoading || userLoading || popularityLoading) {
     return <div>Loading...</div>;
-  } else if (card) {
+  } else if (card.length) {
     return (
       <div>
         <div>
-          {card ? (
-            <Grid container className="classes.grid bottom" spacing={5}>
-              {card}
-            </Grid>
-          ) : (
-            <div>
-              <br />
-            </div>
+          <Grid container className="classes.grid bottom" spacing={5}>
+            {card}
+          </Grid>
+
+          {(type === "images" ||
+            type === "bin" ||
+            type === "allPosts" ||
+            type === "popularity") && (
+            <Button className="btn" onClick={next}>
+              Get More
+            </Button>
           )}
 
           {(type === "images" ||
             type === "bin" ||
             type === "allPosts" ||
             type === "popularity") && (
-            <Button className="btn btn-outline-warning" onClick={next}>
-              Get More
+            // <Link to="/new-post" className="btn">
+            //   Upload a Post
+            // </Link>
+            <Button className="btn" component={Link} to="/new-post">
+              Upload a Post
             </Button>
           )}
+
           {/* {card.length === 0 && <h2>No Images</h2>} */}
+        </div>
+      </div>
+    );
+  } else if (!card.length) {
+    return (
+      <div>
+        <div className="NoImgDis">
+          {type === "bin" ? (
+            <Alert key="danger" variant="danger" className="NoImg">
+              No Image, you can add some Image in imageList
+            </Alert>
+          ) : type === "allPosts" ? (
+            <Alert key="danger" variant="danger" className="NoImg">
+              No Image, you can upload some Images
+            </Alert>
+          ) : (
+            <Alert key="danger" variant="danger" className="NoImg">
+              No Image, Please Add some images
+            </Alert>
+          )}
+        </div>
+        <div className="backHome">
+          <Link to="/">
+            <Button variant="light" className="btn btn-outline-success btnWid">
+              To Images List
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -311,7 +344,58 @@ const Home = (props) => {
       <div>
         {type === "images" && unsplashError && (
           <div>
-            <Error />
+            <Alert key="danger" variant="danger" className="upFron">
+              {unsplashError.message}, Please try again
+            </Alert>
+            <div className="divDis">
+              <Link to="/">
+                <Button variant="light" className="btn-outline-success backBtn">
+                  Back to Images List
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+        {type === "bin" && binnedError && (
+          <div>
+            <Alert key="danger" variant="danger" className="upFron">
+              {binnedError.message}, Please try again
+            </Alert>
+            <div className="divDis">
+              <Link to="/">
+                <Button variant="light" className="btn-outline-success backBtn">
+                  Back to Images List
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+        {type === "allPosts" && userError && (
+          <div>
+            <Alert key="danger" variant="danger" className="upFron">
+              {userError.message}, Please try again
+            </Alert>
+            <div className="divDis">
+              <Link to="/">
+                <Button variant="light" className="btn-outline-success backBtn">
+                  Back to Images List
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+        {type === "popularity" && popularityError && (
+          <div>
+            <Alert key="danger" variant="danger" className="upFron">
+              {popularityError.message}, Please try again
+            </Alert>
+            <div className="divDis">
+              <Link to="/">
+                <Button variant="light" className="btn-outline-success backBtn">
+                  Back to Images List
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>

@@ -4,6 +4,8 @@ import { Routes, Route, BrowserRouter, Router, Link } from "react-router-dom";
 import logo from "./img/tiger.png";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import UserPost from "./component/UserPost";
+import Error from "./component/Error";
 // import ImageList from "./component/ImageList";
 import Home from "./component/Home";
 import {
@@ -45,7 +47,7 @@ function App() {
               All Upload images
             </Route>
 
-            <Route exact path="/new-post" element={<Home type={"post"} />}>
+            <Route exact path="/new-post" element={<UserPost type={"post"} />}>
               Upload posts
             </Route>
 
@@ -56,6 +58,7 @@ function App() {
             >
               Popularity
             </Route>
+            <Route path="*" element={<Error />}></Route>
           </Routes>
         </BrowserRouter>
       </ApolloProvider>
