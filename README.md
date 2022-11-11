@@ -1,8 +1,8 @@
 # Binterest_Image-curation-website
 
-## describe
+## Describe
 
-    It is a full stack project which uses React, Apollo Client, bootstrap, JavaScript as frontend and uses Node.js, Express, Redis, GraphQL,  Apollo Server to achieve backend.
+- This is a full stack project which uses React, Apollo Client, bootstrap, JavaScript as frontend and uses Node.js, Express, Redis, GraphQL, Apollo Server to achieve backend.
 
 ## How to run
 
